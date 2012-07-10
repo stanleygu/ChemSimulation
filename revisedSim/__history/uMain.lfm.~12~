@@ -1,0 +1,42 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 589
+  ClientWidth = 657
+  Visible = False
+  OnCreate = FormCreate
+  StyleLookup = 'backgroundstyle'
+  object PaintBox1: TPaintBox
+    Width = 657.000000000000000000
+    Height = 521.000000000000000000
+    OnClick = PaintBox1Click
+    OnDblClick = PaintBox1DblClick
+    OnMouseDown = PaintBox1MouseDown
+    OnMouseMove = PaintBox1MouseMove
+    OnMouseUp = PaintBox1MouseUp
+    OnPaint = PaintBox1Paint
+  end
+  object Button1: TButton
+    Position.Point = '(0,520)'
+    Width = 113.000000000000000000
+    Height = 41.000000000000000000
+    OnClick = Button1Click
+    TabOrder = 1
+    Text = 'Button1'
+  end
+  object Button2: TButton
+    Position.Point = '(112,520)'
+    Width = 113.000000000000000000
+    Height = 41.000000000000000000
+    TabOrder = 2
+    Text = 'Button2'
+  end
+  object Memo1: TMemo
+    Position.Point = '(240,528)'
+    Width = 100.000000000000000000
+    Height = 50.000000000000000000
+    TabOrder = 3
+    KeyboardType = vktDefault
+  end
+end
