@@ -2,47 +2,48 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 771
-  ClientWidth = 978
+  ClientHeight = 1024
+  ClientWidth = 768
   Visible = False
   OnCreate = FormCreate
   StyleLookup = 'backgroundstyle'
   object PaintBox1: TPaintBox
-    Width = 977.000000000000000000
-    Height = 705.000000000000000000
+    Width = 961.000000000000000000
+    Height = 673.000000000000000000
     OnClick = PaintBox1Click
-    OnDblClick = PaintBox1DblClick
     OnMouseDown = PaintBox1MouseDown
     OnMouseMove = PaintBox1MouseMove
     OnMouseUp = PaintBox1MouseUp
     OnPaint = PaintBox1Paint
     object Panel1: TPanel
-      Position.Point = '(432,248)'
-      Width = 185.000000000000000000
-      Height = 257.000000000000000000
+      Position.Point = '(648,24)'
+      Width = 249.000000000000000000
+      Height = 313.000000000000000000
       TabOrder = 0
       object ListBox1: TListBox
         Position.Point = '(8,8)'
-        Width = 169.000000000000000000
-        Height = 113.000000000000000000
+        Width = 233.000000000000000000
+        Height = 137.000000000000000000
         TabOrder = 0
       end
       object Button3: TButton
-        Position.Point = '(40,216)'
-        Width = 105.000000000000000000
-        Height = 25.000000000000000000
+        Position.Point = '(56,256)'
+        Width = 137.000000000000000000
+        Height = 41.000000000000000000
         OnClick = Button3Click
         TabOrder = 1
-        Text = 'Button3'
+        Text = 'Done!'
       end
       object NumberBox1: TNumberBox
-        Position.Point = '(24,160)'
-        Width = 137.000000000000000000
-        Height = 38.000000000000000000
+        Position.Point = '(32,168)'
+        Width = 185.000000000000000000
+        Height = 70.000000000000000000
         TabOrder = 2
+        Font.Size = 16.000000000000000000
         KeyboardType = vktDefault
+        OnChange = NumberBox1Change
         DecimalDigits = 5
-        Max = 10.000000000000000000
+        Max = 100.000000000000000000
         ValueType = vtFloat
         HorzIncrement = 1.000000000000000000
         VertIncrement = 5.000000000000000000
@@ -50,18 +51,19 @@ object Form1: TForm1
     end
   end
   object Button1: TButton
-    Position.Point = '(-8,704)'
+    Position.Point = '(0,688)'
     Width = 137.000000000000000000
     Height = 65.000000000000000000
     OnClick = Button1Click
     TabOrder = 1
-    Text = 'Button1'
+    Text = 'Add Species'
   end
-  object Memo1: TMemo
-    Position.Point = '(136,720)'
+  object Button2: TButton
+    Position.Point = '(136,688)'
     Width = 145.000000000000000000
-    Height = 50.000000000000000000
+    Height = 65.000000000000000000
+    OnClick = Button2Click
     TabOrder = 2
-    KeyboardType = vktDefault
+    Text = 'Clear'
   end
 end

@@ -2,14 +2,12 @@ unit uReaction;
 
 interface
 
-uses FMX_Types, Types, sysUtils, Classes;
+uses FMX_Types, Types, sysUtils;
 
 Type
   TReaction = class(TObject)
     x, y, w, h: single;
     name: string;
-    Reactants: TStringList;
-    Products: TStringList;
     RateConstant: single;
     Constructor Create(x, y, w, h: single; name: string);
     procedure paint(Canvas: TCanvas);
@@ -25,10 +23,6 @@ begin
   self.w := w;
   self.h := h;
   self.name := name;
-  //Lists that record the index of a given reacion's reactants/products
-  //within the respectful list within main (ie reactantslist/prodcutslist
-  self.Reactants := TStringList.Create;
-  self.Products := TStringList.Create;
   //rate constant that the user inputs
   self.RateConstant := 0;
 end;

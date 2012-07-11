@@ -11,11 +11,11 @@ type
   TForm1 = class(TForm)
     PaintBox1: TPaintBox;
     Button1: TButton;
-    Memo1: TMemo;
     Panel1: TPanel;
     ListBox1: TListBox;
     Button3: TButton;
     NumberBox1: TNumberBox;
+    Button2: TButton;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure PaintBox1Paint(Sender: TObject; Canvas: TCanvas);
@@ -26,8 +26,9 @@ type
     procedure PaintBox1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Single);
     procedure PaintBox1Click(Sender: TObject);
-    procedure PaintBox1DblClick(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure NumberBox1Change(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -60,9 +61,11 @@ type
     //products/reactants and vice versa
     NewName: string;
     Coefficient: integer;
+    CoefficientChange: integer;
     //Variables for designating the node width and height
     NodeW: integer;
     NodeH: integer;
+
   end;
 
 var
@@ -111,15 +114,30 @@ begin
       Result := -1;
   Result := -1;
 end;
-
+//Adds a new species to the left hand side
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   Species := TSpecies.Create(PaintBox1.Width*0.075, 0, NodeW, NodeH, 'A');
   SpeciesList.Add(species);
   SpeciesSelectedIndex := -1;
+  Panel1.Visible := False;
   PaintBox1.Repaint;
 end;
-
+//Clears the form of an species present
+procedure TForm1.Button2Click(Sender: TObject);
+var
+  I: integer;
+begin
+  SpeciesList.Clear;
+  ReactantsList.Clear;
+  ProductsList.Clear;
+  Panel1.Visible := False;
+  for I := 0 to 4 do
+    (ReactionsList[I] as TReaction).RateConstant := 0;
+  PaintBox1.Repaint;
+end;
+//Removes teh panel for a given reaction, however, clicking anywhere
+//outside of the panel will accomplish its removal
 procedure TForm1.Button3Click(Sender: TObject);
 begin
   Panel1.Visible := False;
@@ -136,65 +154,39 @@ begin
   Alphabet := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   SpeciesMove := False;
   Panel1.Visible := False;
-  Button1.Text := 'Add Species';
-  Button3.Text := 'Done!';
-  NodeW := 30;
-  NodeH := 30;
+  NodeW := 35;
+  NodeH := 35;
   //SpeciesSelectedIndex := -1;
   ReactantSelectedIndex := -1;
   ProductSelectedIndex := -1;
   ReactionSelectedIndex := -1;
   DoubleClick := False;
   MouseMove := False;
+  PaintBox1.Width := Form1.ClientHeight;
+  PaintBox1.Height := Form1.ClientWidth*0.86;
+  Button1.Height := Form1.ClientWidth*0.1;
+  Button2.Height := Form1.ClientWidth*0.1;
+  Button1.Position.X := 0;
+  Button1.Position.Y := Form1.ClientWidth*0.87;
+  Button2.Position.X := Button1.Width;
+  Button2.Position.Y := Form1.ClientWidth*0.87;
   for I := 1 to 5 do
     ReactionsList.Add(TReaction.Create(PaintBox1.Width*0.575, PaintBox1.Height*(I/5 - 0.1), NodeW, NodeH, 'R'+IntToStr(I)));
 end;
 
-procedure TForm1.PaintBox1Click(Sender: TObject);
+procedure TForm1.NumberBox1Change(Sender: TObject);
 begin
-  //Hack to get around the single click action happening when the user double
-  //clicks or moves the mouse
-  if DoubleClick then
-  begin
-    DoubleClick := False;
-    Exit;
-  end;
-  //Clicking Increases the coefficient by 1
-  if (ReactantSelectedIndex <> -1) and (MouseMove = False) then
-    (ReactantsList[ReactantSelectedIndex] as TSpecies).coefficient :=
-        (ReactantsList[ReactantSelectedIndex] as TSpecies).coefficient+1
-  else if (ProductSelectedIndex <> -1) and (MouseMove = False) then
-    (ProductsList[ProductSelectedIndex] as TSpecies).coefficient :=
-        (ProductsList[ProductSelectedIndex] as TSpecies).coefficient+1;
-  MouseMove := False;
+  (ReactionsList[ReactionSelectedIndex] as TReaction).RateConstant := NumberBox1.Value;
 end;
 
-procedure TForm1.PaintBox1DblClick(Sender: TObject);
+procedure TForm1.PaintBox1Click(Sender: TObject);
 begin
-  DoubleClick := True;
-  //Decreases the coefficient of a selected species
-  //Will not allow it to go below 1
-  if (ReactantSelectedIndex <> -1) then
+  if ReactionSelectedIndex <> -1 then
   begin
-    (ReactantsList[ReactantSelectedIndex] as TSpecies).coefficient:=
-        (ReactantsList[ReactantSelectedIndex] as TSpecies).coefficient-1;
-    if (ReactantsList[ReactantSelectedIndex] as TSpecies).coefficient = 0 then
-      (ReactantsList[ReactantSelectedIndex] as TSpecies).coefficient := 1;
-  end
-  else if ProductSelectedIndex <> -1 then
-  begin
-    (ProductsList[ProductSelectedIndex] as TSpecies).coefficient :=
-        (ProductsList[ProductSelectedIndex] as TSpecies).coefficient-1;
-    if (ProductsList[ProductSelectedIndex] as TSpecies).coefficient = 0 then
-      (ProductsList[ProductSelectedIndex] as TSpecies).coefficient := 1;
-  end
-  //Opens up the panel to input the rate law and initial rates for a given reaction
-  else if ReactionSelectedIndex <> -1 then
-  begin
-    Panel1.Position.X := (ReactionsList[ReactionSelectedIndex] as TReaction).x + 10;
-    Panel1.Position.Y := (ReactionsList[ReactionSelectedIndex] as TReaction).y + 10;
     Panel1.Visible := True;
+    NumberBox1.Value := (ReactionsList[ReactionSelectedIndex] as TReaction).RateConstant;
   end;
+  MouseMove := False;
 end;
 
 procedure TForm1.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -206,20 +198,30 @@ begin
   ReactantSelectedIndex := -1;
   ProductSelectedIndex := -1;
   ReactionSelectedIndex := -1;
+  CoefficientChange := -1;
   Panel1.Visible := False;
   //selecting a species from the left hand side
   if x < PaintBox1.Width*0.15 then
   begin
     SpeciesSelectedIndex := isSpecies(x, y, SpeciesList);
-    Lists := 1;
     SpeciesMove := True;
   end
   //selecting a species from the reactants
   else if x < PaintBox1.Width*0.5 then
   begin
     ReactantSelectedIndex := isSpecies(x, y, ReactantsList);
-    Lists := 2;
     SpeciesMove := True;
+    if ReactantSelectedIndex = -1 then
+    begin
+      CoefficientChange := isSpecies(x, y+NodeH, ReactantsList);
+      if CoefficientChange <> -1 then
+        (ReactantsList[CoefficientChange] as TSpecies).coefficient :=
+          (ReactantsList[CoefficientChange] as TSpecies).coefficient+1;
+      CoefficientChange := isSpecies(x, y-NodeH, ReactantsList);
+      if (CoefficientChange <> -1)  and ((ReactantsList[CoefficientChange] as TSpecies).coefficient <> 1) then
+        (ReactantsList[CoefficientChange] as TSpecies).coefficient :=
+          (ReactantsList[CoefficientChange] as TSpecies).coefficient-1;
+    end;
   end
   //selecting a reaction
   else if x < PaintBox1.Width*0.65 then
@@ -228,8 +230,18 @@ begin
   else if x < PaintBox1.Width then
   begin
     ProductSelectedIndex := isSpecies(x, y, ProductsList);
-    Lists := 3;
     SpeciesMove := True;
+    if ProductSelectedIndex = -1 then
+    begin
+      CoefficientChange := isSpecies(x, y+NodeH, ProductsList);
+      if CoefficientChange <> -1 then
+        (ProductsList[CoefficientChange] as TSpecies).coefficient :=
+          (ProductsList[CoefficientChange] as TSpecies).coefficient+1;
+      CoefficientChange := isSpecies(x, y-NodeH, ProductsList);
+      if (CoefficientChange <> -1) and ((ProductsList[CoefficientChange] as TSpecies).coefficient <> 1) then
+        (ProductsList[CoefficientChange] as TSpecies).coefficient :=
+          (ProductsList[CoefficientChange] as TSpecies).coefficient-1;
+    end;
   end;
   //Keeps track of the selected species original position
   //this is useful when the user does something eratic with the species
@@ -283,7 +295,19 @@ var
 begin
   SpeciesMove := False;
   //Moves a species into the reactants area
-  if (x > PaintBox1.Width*0.15) and (x < PaintBox1.Width*0.5) then
+  //Moves a species into the left hand area
+  if x < PaintBox1.Width*0.15 then
+  begin
+    if ReactantSelectedIndex <> -1 then
+    begin
+      ReactantsList.Delete(ReactantSelectedIndex);
+    end
+    else if ProductSelectedIndex <> -1 then
+    begin
+      ProductsList.Delete(ProductSelectedIndex);
+    end;
+  end
+  else if (x < PaintBox1.Width*0.5) then
   begin
     //user is moving a species from the left hand side
     if SpeciesSelectedIndex <> -1 then
@@ -335,8 +359,22 @@ begin
         (ReactantsList[I] as TSpecies).y :=
             PaintBox1.Height*(((ReactantsList[I] as TSpecies).reaction+1)/5 - 0.1);
   end
+  //Moves a species into the reactions area
+  else if (x < PaintBox1.Width*0.65) then
+  begin
+    if ReactantSelectedIndex <> -1 then
+    begin
+      (ReactantsList[ReactantSelectedIndex] as TSpecies).x := currentX;
+      (ReactantsList[ReactantSelectedIndex] as TSpecies).y := currentY;
+    end
+    else if ProductSelectedIndex <> -1 then
+    begin
+      (ProductsList[ProductSelectedIndex] as TSpecies).x := currentX;
+      (ProductsList[ProductSelectedIndex] as TSpecies).y := currentY;
+    end;
+  end
   //moves a species into the products area
-  else if x > PaintBox1.Width*0.65 then
+  else if x < PaintBox1.Width then
   begin
     //Moving a species from the left hand side
     if SpeciesSelectedIndex <> -1 then
@@ -349,7 +387,7 @@ begin
         ProductsList.Add(TSpecies.Create(x, y, NodeW, NodeH, Alphabet[SpeciesSelectedIndex+1], 1, 2))
       else if y < PaintBox1.Height*0.8 then
         ProductsList.Add(TSpecies.Create(x, y, NodeW, NodeH, Alphabet[SpeciesSelectedIndex+1], 1, 3))
-      else if y < PaintBox1.Height*0.8 then
+      else if y < PaintBox1.Height then
         ProductsList.Add(TSpecies.Create(x, y, NodeW, NodeH, Alphabet[SpeciesSelectedIndex+1], 1, 4));
     end
     //Moving a Reactant to the products
@@ -387,34 +425,6 @@ begin
       for I := 0 to ProductsList.Count-1 do
         (ProductsList[I] as TSpecies).y :=
             PaintBox1.Height*(((ProductsList[I] as TSpecies).reaction+1)/5 - 0.1);
-  end
-  //Moves a species into the reactions area
-  else if (x > PaintBox1.Width*0.5) and (x < PaintBox1.Width*0.65) then
-  begin
-    if ReactantSelectedIndex <> -1 then
-    begin
-      (ReactantsList[ReactantSelectedIndex] as TSpecies).x := currentX;
-      (ReactantsList[ReactantSelectedIndex] as TSpecies).y := currentY;
-    end
-    else if ProductSelectedIndex <> -1 then
-    begin
-      (ProductsList[ProductSelectedIndex] as TSpecies).x := currentX;
-      (ProductsList[ProductSelectedIndex] as TSpecies).y := currentY;
-    end;
-  end
-  //Moves a species into the left hand area
-  else if x < PaintBox1.Width*0.15 then
-  begin
-    if ReactantSelectedIndex <> -1 then
-    begin
-      (ReactantsList[ReactantSelectedIndex] as TSpecies).x := currentX;
-      (ReactantsList[ReactantSelectedIndex] as TSpecies).y := currentY;
-    end
-    else if ProductSelectedIndex <> -1 then
-    begin
-      (ProductsList[ProductSelectedIndex] as TSpecies).x := currentX;
-      (ProductsList[ProductSelectedIndex] as TSpecies).y := currentY;
-    end;
   end;
   //Resets the coords if the left species was selected and moved
   if SpeciesSelectedIndex <> -1 then
@@ -430,6 +440,7 @@ var
   I: integer;
 begin
   //Draws All the species on the left side
+  Canvas.Font.Size := 14;
   if SpeciesSelectedIndex = -1 then
   begin
     for I := 0 to SpeciesList.Count-1 do
@@ -451,11 +462,17 @@ begin
   //Draws the Reactants
   if ReactantsList.Count <> 0 then
     for I := 0 to ReactantsList.Count-1 do
+    begin
       (ReactantsList[I] as TSpecies).paint(Canvas);
+      (ReactantsList[I] as TSpecies).paintCoefficients(Canvas);
+    end;
   //Draws the Products
   if ProductsList.Count <> 0 then
     for I := 0 to ProductsList.Count-1 do
+    begin
       (ProductsList[I] as TSpecies).paint(Canvas);
+      (ProductsList[I] as TSpecies).paintCoefficients(Canvas);
+    end;
 end;
 
 end.
